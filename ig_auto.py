@@ -21,13 +21,12 @@ def main(bypass=False ):
     message = str(input("Type in message you want to send: "))
     #time input
     print("Now input the date and time you want it to send in numbers only")
-    month = int(input("Month:"))
-    day = int(input("Day:"))
-    hour = int(input("Hour:"))
-    minute = int(input("Minute:"))
     #makes the time go by until needed execution
-    TimeDiff(YEAR, month, day,hour, minute)
+    TimeDiff(YEAR)
     #starts creating browser and executes message
+    startbrowser(username, password, ig_tag, message)
+
+def startbrowser(username, password, ig_tag, message):
     browser  = Chrome(PATH)
     browser.get("https://instagram.com")
     login(username,password,browser)
@@ -35,8 +34,8 @@ def main(bypass=False ):
     send_message(message,browser)
     browser.quit()
 
+#returns a list with a username and password and makes sure its valid
 def get_login_info():
-    
     verified = False
     while not verified:
         username = str(input("Username: "))
@@ -53,7 +52,6 @@ def verify_login(username,password):
         login(username, password, tester_browser)
         #implement if it finds "incorrect" then return False if not then return True,
         try:
-            
             main = WebDriverWait(tester_browser, timeout=5).until(
             EC.presence_of_element_located((By.ID,"slfErrorAlert" ))
             )
@@ -111,14 +109,22 @@ def sleep(n):
     for _ in range(n):
         time.sleep(1)
 
-def TimeDiff(year, month, day, hour, minute):
-    current_time = datetime.now()
-    time_until_execute = datetime(year, month, day, hour, minute)
-
+def TimeDiff(year):
+    # Ensures that time picked isn't in the past 
+    valid_time = False
+    while not valid_time:
+        month = int(input("Month:"))
+        day = int(input("Day:"))
+        hour = int(input("Hour:"))
+        minute = int(input("Minute:"))
+        current_time = datetime.now()
+        time_until_execute = datetime(year, month, day, hour, minute)
+        valid_time = True
+    #creates the time that needs to pass
     TimePrinter(current_time,time_until_execute)
     Time_yet = False
     while not Time_yet:
-        sleep(30)
+        sleep(60)
         current_time = datetime.now()
         if current_time >= time_until_execute:
             Time_yet = True
@@ -126,9 +132,13 @@ def TimeDiff(year, month, day, hour, minute):
         TimePrinter(current_time,time_until_execute)
 def TimePrinter(current_time, time_until_execute):
     difference = time_until_execute - current_time
-    in_minutes = int(difference.total_seconds()) // 60
-    print(str(in_minutes) + " minutes until execution")
+    in_minutes = int(difference.total_seconds()) / 60
+    if in_minutes > 60:
+        roundedtime = in_minutes//60 
+        print(str(round(roundedtime))+" hour/s and " + str(round(in_minutes-(60*roundedtime))) + "minutes until execution")
+    else:    
+        print(str(in_minutes) + " minutes until execution")
 
-main(False)
+main()
 
 
